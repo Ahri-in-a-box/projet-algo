@@ -1,18 +1,18 @@
-<h1>Projet d'algo</h1>
+#Projet d'algo
 
-<p>Objectifs: <br/>
-     [] Creer un programme capable de lire un automate dans un fichier <br/>
-     [] Creer un programme capable d'écrire la sortie d'un automate dans un fichier <br/>
-     [] Creer un programme capable d'interpreter un automate et de vérifier si une liste de mot appartient au langage qu'il génère <br/>
-     [] Creer un programme capable de minimiser un AFD <br/>
-     [] Creer un programme capable de déterminiser un AFN <br/>
-     [] Creer un programme qui prend en charge les e-transitions (epsilon transitions) <br/>
-<p>
+##Objectifs:
+- [ ] Creer un programme capable de lire un automate dans un fichier
+- [ ] Creer un programme capable d'écrire la sortie d'un automate dans un fichier
+- [ ] Creer un programme capable d'interpreter un automate et de vérifier si une liste de mot appartient au langage qu'il génère
+- [ ] Creer un programme capable de minimiser un AFD
+- [ ] Creer un programme capable de déterminiser un AFN
+- [ ] Creer un programme qui prend en charge les e-transitions (epsilon transitions)
 
-<p>Suppléments (non obligatoires): <br/>
-     [] Implémenter l'algorithme de Thomson <br/>
-     [] Implémenter BMC <br/>
-     [] Implémenter une interface graphique <br/>
-     [] Implémenter la gestion des grammaires <br/>
-     [] Implémenter les automates à pile <br/>
-<p>
+
+##Suppléments (non obligatoires): 
+- [ ] Implémenter l'algorithme de Thomson
+- [ ] Implémenter BMC
+- [ ] Implémenter une interface graphique
+- [ ] Implémenter la gestion des grammaires
+- [ ] Implémenter les automates à pile
+
