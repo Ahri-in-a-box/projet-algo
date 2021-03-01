@@ -1,5 +1,6 @@
-Projet d'algo
+<h1>Projet d'algo</h1>
 
-Principe:
-    Creer un programme capable d'interpreter un automate et de vérifier si une liste de mot appartient au langage qu'il génère
-    Creer un programme capable de minimiser un AFD
+<p>Principe: <br/>
+     - Creer un programme capable d'interpreter un automate et de vérifier si une liste de mot appartient au langage qu'il génère <br/>
+     - Creer un programme capable de minimiser un AFD <br/>
+<p>
