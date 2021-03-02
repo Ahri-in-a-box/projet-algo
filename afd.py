@@ -66,9 +66,27 @@ class CAFD:
         for word in wList:
             print(word + " -> " + str(self.check(word)))
 
+    def checkFile(self, fileName):
+        try:
+            file = open("./inputs(tests)/AFD/" + fileName + ".txt", "r")
+        except:
+            sys.exit("Can't open/read the file " + fileName + ".txt")
+
+        lines = file.readlines()
+        file.close()
+
+        for line in lines:
+            if line[-1] == '\n':
+                print(line[:-1])
+                line = line[:-1]
+
+        print(lines)
+
+        #self.checkList(lines)
+
 
 
 afd = CAFD("afd1")
 afd.load()
 #afd.print()
-afd.checkList(["aa","ab","bb","aaa","aab","aba", "abab"])
+afd.checkFile("mots1")
