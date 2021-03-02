@@ -2,24 +2,63 @@
 
 import sys
 
-class CAFD:
+class CState:
     def __init__(self, name):
         self.name = name
-        self.filePath = "./inputs(tests)/AFD/" + name + ".txt"
+        self.isFinal = False
+
+    def setFinal(self, isFinal):
+        self.isFinal = isFinal
+
+    def isAccepting(self):
+        return self.isFinal
+
+    def getName(self):
+        return self.name
+
+class CTransition:
+    def __init__(self, state1, state2, value):
+        self.startState = state1
+        self.endState = state2
+        self.condition = value
+
+    def print(self):
+        print(str(self.startState.getName()) + '-' + str(self.condition) + '->' + str(self.endState.getName()))
+
+    def isValid(self, currentState, event):
+        if currentState == self.startState and event == self.condition:
+            return True
+        else:
+            return False
+
+    def take(self, currentState, event):
+        if self.isValid(currentState,event):
+            return self.endState
+        else:
+            return self.startState
+
+class CAutomaton:
+    def __init__(self, name):
+        self.name = name
+        self.symboles = []
+        self.states = []
+
+class CAFD(CAutomaton):
+    def __init__(self, name, output):
+        self.name = name
         self.symboles = []
         self.currentState = -1
         self.defaultState = -1
-        self.finalState = -1
         self.states = []
-        self.table = 0
+        self.table = []
+        self.output = output
 
     def print(self):
         print("Name: " + self.name)
-        print("filePath: " + self.filePath)
         print("Symboles: ")
         print(self.symboles)
-        print("Current state: " + str(self.currentState))
-        print("Final state: " + str(self.finalState))
+        print("Current state: ")
+        print(self.currentState)
         print("States: ")
         print(self.states)
         print("Transition table: ")
@@ -27,9 +66,9 @@ class CAFD:
 
     def load(self):
         try:
-            file = open(self.filePath, "r")
+            file = open("./inputs(tests)/AFD/" + self.name, "r")
         except:
-            sys.exit("Can't open/read the file " + self.name + ".txt")
+            sys.exit("Can't open/read the file " + self.name)
 
         lines = file.readlines()
         file.close()
@@ -38,11 +77,14 @@ class CAFD:
             self.symboles.append(c)
         self.symboles.remove('\n')
 
-        self.currentState = self.defaultState = int(lines[2])
-        self.finalState = int(lines[3])
-        self.states.extend(range(0,int(lines[1]),1))
+        for i in range(0,int(lines[1]),1):
+            self.states.append(CState(i))
 
-        self.table = [[-1 for x in range(int(len(self.symboles)))] for y in range(int(len(self.states)))]
+        for i in lines[3]:
+            if i != '\n':
+                self.states[int(i)].setFinal(True)
+
+        self.currentState = self.defaultState = self.states[int(lines[2])]
 
         for i in range(4,len(lines),1):
             tmp = []
@@ -50,27 +92,38 @@ class CAFD:
                 if c != ' ' and c != '\n':
                     tmp.append(c)
             
-            self.table[int(tmp[0])][self.symboles.index(tmp[2])] = int(tmp[1])
+            self.table.append(CTransition(self.states[int(tmp[0])], self.states[int(tmp[1])], tmp[2]))
 
     def check(self, word):      
         self.currentState = self.defaultState
 
         for c in word:
-            if self.currentState == -1:
-                return False
-            self.currentState = self.table[self.currentState][self.symboles.index(c)]
+            transi = []
+            for t in self.table:
+                if t.isValid(self.currentState, c):
+                    transi.append(t)
 
-        return self.currentState == self.finalState
+            if len(transi) == 0:
+                return 0
+
+            self.currentState = transi[0].take(self.currentState, c)
+
+        if self.currentState.isAccepting:
+            return 1
+        else:
+            return 0
 
     def checkList(self, wList):
+        file = open(self.output, "w")
         for word in wList:
-            print(word + " -> " + str(self.check(word)))
+            file.write(str(self.check(word)) + '\n')
+        file.close()
 
     def checkFile(self, fileName):
         try:
-            file = open("./inputs(tests)/AFD/" + fileName + ".txt", "r")
+            file = open("./inputs(tests)/AFD/" + fileName, "r")
         except:
-            sys.exit("Can't open/read the file " + fileName + ".txt")
+            sys.exit("Can't open/create the file " + fileName)
 
         lines = file.readlines()
         file.close()
@@ -81,14 +134,18 @@ class CAFD:
 
         self.checkList(lines)
 
-    def checkFileList(self, fList):
-        for f in fList:
-            print("\nFile \"" + f + "\":")
-            self.checkFile(f)
+argc = len(sys.argv)
 
+if len(sys.argv) < 5:
+    sys.exit("Not enough arguments to run the script")
 
+mode = int(sys.argv[1])
+aut = sys.argv[2]
+inp = sys.argv[3]
+outp = sys.argv[4]
 
-afd = CAFD("afd1")
+afd = CAFD(aut, outp)
 afd.load()
-#afd.print()
-afd.checkFileList(["mots1","mots2","mots3"])
+
+if mode == 0:
+    afd.checkFile(inp)
