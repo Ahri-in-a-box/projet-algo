@@ -75,14 +75,11 @@ class CAFD:
         lines = file.readlines()
         file.close()
 
-        for line in lines:
-            if line[-1] == '\n':
-                print(line[:-1])
-                line = line[:-1]
+        for i in range(len(lines)):
+            if lines[i][-1] == '\n':
+                lines[i] = lines[i][:-1]
 
-        print(lines)
-
-        #self.checkList(lines)
+        self.checkList(lines)
 
 
 
