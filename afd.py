@@ -8,6 +8,7 @@ class CAFD:
         self.filePath = "./inputs(tests)/AFD/" + name + ".txt"
         self.symboles = []
         self.currentState = -1
+        self.defaultState = -1
         self.finalState = -1
         self.states = []
         self.table = 0
@@ -37,7 +38,7 @@ class CAFD:
             self.symboles.append(c)
         self.symboles.remove('\n')
 
-        self.currentState = int(lines[2])
+        self.currentState = self.defaultState = int(lines[2])
         self.finalState = int(lines[3])
         self.states.extend(range(0,int(lines[1]),1))
 
@@ -51,16 +52,14 @@ class CAFD:
             
             self.table[int(tmp[0])][self.symboles.index(tmp[2])] = int(tmp[1])
 
-    def check(self, word):
-        w = []
+    def check(self, word):      
+        self.currentState = self.defaultState
+
         for c in word:
-            w.append(c)
-        
-        for c in w:
             if self.currentState == -1:
                 return False
             self.currentState = self.table[self.currentState][self.symboles.index(c)]
-        
+
         return self.currentState == self.finalState
 
     def checkList(self, wList):
