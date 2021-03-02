@@ -81,9 +81,14 @@ class CAFD:
 
         self.checkList(lines)
 
+    def checkFileList(self, fList):
+        for f in fList:
+            print("\nFile \"" + f + "\":")
+            self.checkFile(f)
+
 
 
 afd = CAFD("afd1")
 afd.load()
 #afd.print()
-afd.checkFile("mots1")
+afd.checkFileList(["mots1","mots2","mots3"])
