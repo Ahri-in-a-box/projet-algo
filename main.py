@@ -7,6 +7,12 @@ class CState:
         self.name = name
         self.isFinal = False
 
+    def __lt__(self, other):
+        if self.name < other.name:
+            return True
+        else:
+            return False
+
     def setFinal(self, isFinal):
         self.isFinal = isFinal
 
@@ -31,6 +37,7 @@ class CTransition:
         else:
             return False
 
+    #The function that return the new state is named 'take' since I had no other idea to name it
     def take(self, currentState, event):
         if self.isValid(currentState,event):
             return self.endState
@@ -38,17 +45,12 @@ class CTransition:
             return self.startState
 
 class CAutomaton:
-    def __init__(self, name):
-        self.name = name
-        self.symboles = []
-        self.states = []
-
-class CAFD(CAutomaton):
     def __init__(self, name, output):
         self.name = name
+        self.type = name[:self.name.index('.')-1].upper()
         self.symboles = []
-        self.currentState = -1
-        self.defaultState = -1
+        self.currentState = []
+        self.defaultStates = []
         self.states = []
         self.table = []
         self.output = output
@@ -65,27 +67,36 @@ class CAFD(CAutomaton):
         print(self.table)
 
     def load(self):
+        #opening file
         try:
-            file = open("./inputs(tests)/AFD/" + self.name, "r")
+            file = open("./inputs(tests)/" + self.type + "/" + self.name, "r")
         except:
             sys.exit("Can't open/read the file " + self.name)
 
+        #reading and closing file
         lines = file.readlines()
         file.close()
 
+        #setting symboles
         for c in lines[0]:
             self.symboles.append(c)
         self.symboles.remove('\n')
 
+        #creating states
         for i in range(0,int(lines[1]),1):
             self.states.append(CState(i))
 
+        #setting default states
+        for i in lines[2]:
+            if i != '\n' and i != ' ':
+                self.defaultStates.append(self.states[int(i)])
+
+        #setting final/accepting states
         for i in lines[3]:
-            if i != '\n':
+            if i != '\n' and i != ' ':
                 self.states[int(i)].setFinal(True)
 
-        self.currentState = self.defaultState = self.states[int(lines[2])]
-
+        #creating transition table (list of transition)
         for i in range(4,len(lines),1):
             tmp = []
             for c in lines[i]:
@@ -94,24 +105,37 @@ class CAFD(CAutomaton):
             
             self.table.append(CTransition(self.states[int(tmp[0])], self.states[int(tmp[1])], tmp[2]))
 
-    def check(self, word):      
-        self.currentState = self.defaultState
+    def check(self, word):
+        #reseting automaton
+        self.currentState = self.defaultStates
 
+        #running automaton
         for c in word:
-            transi = []
-            for t in self.table:
-                if t.isValid(self.currentState, c):
-                    transi.append(t)
+            #Checking all current states (for Non Deterministic Automatons)
+            nextStates = []
+            for cs in self.currentState:
+                #Checking available transitions for the corresponding event and current state
+                transi = []
+                for t in self.table:
+                    if t.isValid(cs, c):
+                        transi.append(t)
+                
+                if len(transi) > 0:
+                    for t in transi:
+                        nextStates.append(t.take(cs, c))
 
-            if len(transi) == 0:
+            if len(nextStates) == 0:
                 return 0
 
-            self.currentState = transi[0].take(self.currentState, c)
+            #Swaping state
+            self.currentState = sorted(list(set(nextStates)))
 
-        if self.currentState.isAccepting():
-            return 1
-        else:
-            return 0
+        #Checking final state
+        for fs in self.currentState:
+            if fs.isAccepting():
+                return 1
+        
+        return 0
 
     def checkList(self, wList):
         file = open(self.output, "w")
@@ -120,32 +144,38 @@ class CAFD(CAutomaton):
         file.close()
 
     def checkFile(self, fileName):
+        #Opening file
         try:
-            file = open("./inputs(tests)/AFD/" + fileName, "r")
+            file = open("./inputs(tests)/" + self.type + "/" + fileName, "r")
         except:
             sys.exit("Can't open/create the file " + fileName)
 
+        #reading and closing file
         lines = file.readlines()
         file.close()
 
+        #editing words to remove '\n' at the end
         for i in range(len(lines)):
             if lines[i][-1] == '\n':
                 lines[i] = lines[i][:-1]
 
         self.checkList(lines)
 
-argc = len(sys.argv)
 
+#Checking args
 if len(sys.argv) < 5:
     sys.exit("Not enough arguments to run the script")
 
+#Setting config with args
 mode = int(sys.argv[1])
 aut = sys.argv[2]
 inp = sys.argv[3]
 outp = sys.argv[4]
 
-afd = CAFD(aut, outp)
-afd.load()
+#creating automaton
+automaton = CAutomaton(aut, outp)
+automaton.load()
 
+#Executing automaton
 if mode == 0:
-    afd.checkFile(inp)
+    automaton.checkFile(inp)
