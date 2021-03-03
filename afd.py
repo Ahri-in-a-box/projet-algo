@@ -108,7 +108,7 @@ class CAFD(CAutomaton):
 
             self.currentState = transi[0].take(self.currentState, c)
 
-        if self.currentState.isAccepting:
+        if self.currentState.isAccepting():
             return 1
         else:
             return 0
