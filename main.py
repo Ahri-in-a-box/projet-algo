@@ -31,6 +31,15 @@ class CTransition:
     def print(self):
         print(str(self.startState.getName()) + '-' + str(self.condition) + '->' + str(self.endState.getName()))
 
+    def getStart(self):
+        return self.startState
+
+    def getEnd(self):
+        return self.endState
+
+    def getCondition(self):
+        return self.condition
+
     def isValid(self, currentState, event):
         if currentState == self.startState and event == self.condition:
             return True
@@ -105,6 +114,39 @@ class CAutomaton:
             
             self.table.append(CTransition(self.states[int(tmp[0])], self.states[int(tmp[1])], tmp[2]))
 
+    def save(self):
+        #opening file
+        try:
+            file = open(self.output, "w")
+        except:
+            sys.exit("Can't open/create the file " + self.output)
+
+        #writing symoles
+        for c in self.symboles:
+            file.write(c)
+        file.write('\n')
+
+        #writing number of states
+        file.write(str(len(self.states)) + '\n')
+
+        #writing default states
+        for ds in self.defaultStates:
+            file.write(str(ds.name) + ' ')
+        file.write('\n')
+
+        #writing accepting/final states
+        for s in self.states:
+            if s.isAccepting():
+                file.write(str(s.name)+ ' ')
+        file.write('\n')
+
+        #writing transitions
+        for t in self.table:
+            file.write(str(t.getStart().getName()) + ' ' + str(t.getEnd().getName()) + ' ' + t.getCondition() + '\n')
+
+        #closing file
+        file.close()
+
     def check(self, word):
         #reseting automaton
         self.currentState = self.defaultStates
@@ -161,16 +203,35 @@ class CAutomaton:
 
         self.checkList(lines)
 
+    def minimise(self):
+        return
 
-#Checking args
-if len(sys.argv) < 5:
+    def determine(self):
+        return
+
+#Checking if mode is provided
+if len(sys.argv) == 0:
     sys.exit("Not enough arguments to run the script")
 
+#modes: 0 = execute automaton, 1 = minimise automaton, 2 = determine automaton
+mode = int(sys.argv[1]) 
+
+#Checking mode
+if mode < 0 or mode > 2:
+    sys.exit("Invalid mode")
+
 #Setting config with args
-mode = int(sys.argv[1])
-aut = sys.argv[2]
-inp = sys.argv[3]
-outp = sys.argv[4]
+if mode == 0:
+    if len(sys.argv) < 5:
+        sys.exit("Not enough arguments to run the script")
+    aut = sys.argv[2]
+    inp = sys.argv[3]
+    outp = sys.argv[4]
+else:
+    if len(sys.argv) < 4:
+        sys.exit("Not enough arguments to run the script")
+    aut = sys.argv[2]
+    outp = sys.argv[3]
 
 #creating automaton
 automaton = CAutomaton(aut, outp)
@@ -179,3 +240,9 @@ automaton.load()
 #Executing automaton
 if mode == 0:
     automaton.checkFile(inp)
+elif mode == 1:
+    automaton.minimise()
+    automaton.save()
+elif mode == 2:
+    automaton.determine()
+    automaton.save()
