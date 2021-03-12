@@ -47,6 +47,7 @@ class CTransition:
             return False
 
     #The function that return the new state is named 'take' since I had no other idea to name it
+    #Addtionnal note: You can now also use getEnd but it doesn't check if the current state and event validate that transition
     def take(self, currentState, event):
         if self.isValid(currentState,event):
             return self.endState
@@ -54,9 +55,12 @@ class CTransition:
             return self.startState
 
 class CAutomaton:
-    def __init__(self, name, output):
+    def __init__(self, name, output, t: None):
         self.name = name
-        self.type = name[:self.name.index('.')-1].upper()
+        if t is None:
+            self.type = name[:self.name.index('.')-1].upper()
+        else:
+            self.type = t
         self.symboles = []
         self.currentState = []
         self.defaultStates = []
@@ -204,13 +208,138 @@ class CAutomaton:
         self.checkList(lines)
 
     def minimise(self):
-        return
+        #Moore algorithm
+
+        #Create transition table
+        tabl = []
+        for s in self.states:
+            #Create line for each state
+            tmp = {"state": s}
+            if tmp["state"].isAccepting():
+                tmp["classe"] = "II"
+            else:
+                tmp["classe"] = "I"
+
+            #tmp is a dictionary with key state refering to its state, classe refering to its state's class (Accepting or not)
+
+            #Fill dictionary with symboles, the ending state and the class of the ending state
+            for t in self.table:
+                if t.getStart() == tmp["state"]:
+                    condi = t.getCondition()
+                    tmp[condi] = t.getEnd()
+                    if t.getEnd().isAccepting():
+                        tmp["_" + condi + "_"] = "II"
+                    else:
+                        tmp["_" + condi + "_"] = "I"
+
+            tabl.append(tmp)
+
+        i = 1 #iterator for classes' name
+
+        for t in tabl:
+            #Check for similar states considering its class and transitions' ending states' class
+            for j in range(0,tabl.index(t) - 1):
+                t2 = tabl[j]
+                if t2["classe"] == t["classe"]:
+                    end = True
+                    for s in self.symboles:
+                        try:
+                            if end and t2["_" + s + "_"] != t["_" + s + "_"]:
+                                end = False
+                        except:
+                            end = False 
+                    if end:
+                        t["_classe_"] = t2["_classe_"]
+
+            if not t.get("_classe_", False):
+                _classe_ = ""
+                for ind in range(0,i):
+                    _classe_ += "I"
+                i+=1
+                t["_classe_"] = _classe_
+        
+        #Check differences between new classes and old classes
+        i = True
+        for t in tabl:
+            if i and t["classe"] != t["_classe_"]:
+                i = False
+
+        while not i:
+            for t in tabl:
+                t["classe"] = t["_classe_"]
+                for s in self.symboles:
+                    t["_" + s + "_"] = tabl[t[s].getName()]["_classe_"]
+
+            i=1
+
+            for t in tabl:
+                #Check for similar states considering its class and transitions' ending states' class
+                for j in range(0,tabl.index(t) - 1):
+                    t2 = tabl[j]
+                    if t2["classe"] == t["classe"]:
+                        end = True
+                        for s in self.symboles:
+                            try:
+                                if end and t2["_" + s + "_"] != t["_" + s + "_"]:
+                                    end = False
+                            except:
+                                end = False
+                        if end:
+                            t["_classe_"] = t2["_classe_"]
+
+                    if not t.get("_classe_", False):
+                        _classe_ = ""
+                        for ind in range(0,i):
+                            _classe_ += "I"
+                        i+=1
+                        t["_classe_"] = _classe_
+            
+            i = True
+            for t in tabl:
+                if i and t["classe"] != t["_classe_"]:
+                    i = False
+
+        states = []
+        transitions = []
+
+        #Create minimised states
+        for t in tabl:
+            exist = False
+            for s in states:
+                if s.getName() == t["classe"]:
+                    exist = True
+
+            if not exist:
+                states.append(CState(t["classe"]))
+
+        #Create minimised transitions
+        for t in tabl:
+            state = None
+            for s in states:
+                if state is None and t["classe"] == s.getName():
+                    state = s
+
+            if state is not None:
+                for s in self.symboles:
+                    try:
+                        transitions.append(CTransition(state, t[s], s)) #t[s] should be changed for the new ending state
+                    except:
+                        s #does nothing but skip
+
+        for s in states:
+            print(s.getName())
+        print()
+        for t in transitions:
+            t.print()
+            
+        return 
 
     def determine(self):
+
         return
 
 #Checking if mode is provided
-if len(sys.argv) == 0:
+if len(sys.argv) <= 1:
     sys.exit("Not enough arguments to run the script")
 
 #modes: 0 = execute automaton, 1 = minimise automaton, 2 = determine automaton
@@ -234,7 +363,13 @@ else:
     outp = sys.argv[3]
 
 #creating automaton
-automaton = CAutomaton(aut, outp)
+if mode == 1:
+    automaton = CAutomaton(aut, outp, "Minimisation")
+elif mode == 2:
+    automaton = CAutomaton(aut, outp, "Determinisation")
+else:
+    automaton = CAutomaton(aut, outp)
+
 automaton.load()
 
 #Executing automaton
