@@ -176,7 +176,7 @@ class CAutomaton:
 
         for t in tabl:
             #Check for similar states considering its class and transitions' ending states' class
-            for j in range(0,tabl.index(t) - 1):
+            for j in range(0,tabl.index(t)):
                 t2 = tabl[j]
                 if t2["classe"] == t["classe"]:
                     end = True
@@ -208,11 +208,14 @@ class CAutomaton:
                 for s in self.symboles:
                     t["_" + s + "_"] = tabl[t[s].getName()]["_classe_"]
 
-            i=1
+            #Overwriting states' next class
+            for t in tabl:
+                t["_classe_"] = None
 
+            i=1
             for t in tabl:
                 #Check for similar states considering its class and transitions' ending states' class
-                for j in range(0,tabl.index(t) - 1):
+                for j in range(0,tabl.index(t)):
                     t2 = tabl[j]
                     if t2["classe"] == t["classe"]:
                         end = True
@@ -225,12 +228,12 @@ class CAutomaton:
                         if end:
                             t["_classe_"] = t2["_classe_"]
 
-                    if not t.get("_classe_", False):
-                        _classe_ = ""
-                        for ind in range(0,i):
-                            _classe_ += "I"
-                        i+=1
-                        t["_classe_"] = _classe_
+                if t["_classe_"] is None:
+                    _classe_ = ""
+                    for ind in range(0,i):
+                        _classe_ += "I"
+                    i+=1
+                    t["_classe_"] = _classe_
             
             i = True
             for t in tabl:
