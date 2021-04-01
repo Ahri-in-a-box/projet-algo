@@ -45,7 +45,7 @@ automaton.load()
 if mode == 0:
     automaton.checkFile(inp)
 elif mode == 1:
-    automaton.minimise().save()
+    automaton.complete().minimise().save()
 elif mode == 2:
     automaton.determine()
     automaton.save()

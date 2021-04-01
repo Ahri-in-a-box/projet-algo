@@ -101,6 +101,11 @@ class CAutomaton:
                 for t in self.table:
                     if t.isValid(cs, c):
                         transi.append(t)
+
+                    #considering epsilon transition as # condition
+                    elif t.getCondition() == "#" and t.getStart == cs: #Every epsilon transition leading to a state that isn't current is added to the current states list
+                        if cs.index(t.getEnd()) < 0:
+                            cs.append(t.getEnd())
                 
                 if len(transi) > 0:
                     for t in transi:
@@ -290,6 +295,34 @@ class CAutomaton:
         self.states = states
         self.table = transitions
             
+        return self
+
+    def complete(self):
+        incompleteStates = []
+        #check for every states if they are complete (they have transition for every symboles)
+        for state in self.states:
+            sym = self.symboles.copy()
+            for t in self.table:
+                for s in self.symboles:
+                    if t.getCondition() == s and t.getStart() == state:
+                        if sym.index(s) >= 0:
+                            sym.remove(s)
+            #Stores the state and its missing symboles
+            if len(sym) > 0:
+                incompleteStates.append({ "state":state, "symboles":sym })
+
+        #Create the trash state and missing transitions
+        if len(incompleteStates) > 0:
+            self.states.append(CState(len(self.states)))
+            P = self.states[len(self.states)-1]
+
+            for s in self.symboles:
+                self.table.append(CTransition(P, P, s))
+
+            for states in incompleteStates:
+                for s in states["symboles"]:
+                    self.table.append(CTransition(states["state"], P, s))
+        
         return self
 
     def determine(self):
