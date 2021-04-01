@@ -103,9 +103,11 @@ class CAutomaton:
                         transi.append(t)
 
                     #considering epsilon transition as # condition
-                    elif t.getCondition() == "#" and t.getStart == cs: #Every epsilon transition leading to a state that isn't current is added to the current states list
-                        if cs.index(t.getEnd()) < 0:
-                            cs.append(t.getEnd())
+                    elif t.getCondition() == "#" and t.getStart() == cs: #Every epsilon transition leading to a state that isn't current is added to the current states list
+                        try:
+                            self.currentState.index(t.getEnd())
+                        except:
+                            self.currentState.append(t.getEnd())
                 
                 if len(transi) > 0:
                     for t in transi:
@@ -116,6 +118,16 @@ class CAutomaton:
 
             #Swaping state
             self.currentState = sorted(list(set(nextStates)))
+
+        #Appling epsilon transition that can be taken with no symboles remaining
+        for cs in self.currentState:
+            for t in self.table:
+                #Every epsilon transition leading to a state that isn't current is added to the current states list
+                if t.getCondition() == "#" and t.getStart() == cs: 
+                    try:
+                        self.currentState.index(t.getEnd())
+                    except:
+                        self.currentState.append(t.getEnd())
 
         #Checking final state
         for fs in self.currentState:
@@ -305,7 +317,9 @@ class CAutomaton:
             for t in self.table:
                 for s in self.symboles:
                     if t.getCondition() == s and t.getStart() == state:
-                        if sym.index(s) >= 0:
+                        try:
+                            sym.index(s)
+                        except:
                             sym.remove(s)
             #Stores the state and its missing symboles
             if len(sym) > 0:
