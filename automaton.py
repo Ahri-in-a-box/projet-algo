@@ -305,8 +305,10 @@ class CAutomaton:
             for t in self.table:
                 for s in self.symboles:
                     if t.getCondition() == s and t.getStart() == state:
-                        if sym.index(s) >= 0:
+                        try:
                             sym.remove(s)
+                        except:
+                            s
             #Stores the state and its missing symboles
             if len(sym) > 0:
                 incompleteStates.append({ "state":state, "symboles":sym })
