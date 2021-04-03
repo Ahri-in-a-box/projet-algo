@@ -339,6 +339,87 @@ class CAutomaton:
         
         return self
 
-    def determine(self):
+    def findNextStates(self, states, symbole):
+        nextStates = []
 
-        return
+        for cs in states:
+            transi = []
+            for t in self.table:
+                if t.isValid(cs, symbole):
+                    transi.append(t)
+                elif t.getCondition() == "#" and t.getStart() == cs: 
+                    try:
+                        self.currentState.index(t.getEnd())
+                    except:
+                        self.currentState.append(t.getEnd())
+            
+            if len(transi) > 0:
+                for t in transi:
+                    nextStates.append(t.take(cs, symbole))
+
+        return nextStates
+
+    def determine(self):
+        table = []
+
+        #Creating first row of the transition table
+        tmp = "{"
+        for s in self.defaultStates:
+            tmp += str(s.getName()) + ","
+        tmp = tmp[:-1] + "}"
+
+        table.append({ "state": self.defaultStates, "name": tmp })
+
+        for s in table:
+            #Creating transition for the current row
+            for sym in self.symboles:
+                tmp = self.findNextStates(s["state"],sym)
+                if len(tmp):
+                    s[sym] = "{"
+                    for state in tmp:
+                        s[sym] += str(state.getName()) + ","
+                    s[sym] = s[sym][:-1] + "}"
+
+                    #checking if state already exists in this table
+                    exist = False
+                    for s2 in table:
+                        if not exist and s2["name"] == s[sym]:
+                            exist = True
+                    
+                    #Adding new state
+                    if not exist:
+                        table.append({ "state": tmp.copy(), "name": s[sym] })
+                else:
+                    s[sym] = "{ }"
+
+        #creating states
+        newStates = []
+        i = 0
+        for row in table:
+            newStates.append(CState(i))
+            for s in row["state"]:
+                if s.isAccepting():
+                    newStates[i].setFinal(True)
+            i += 1
+        
+        #creating transitions
+        newTransi = []
+        i = 0
+        for row in table:
+            for sym in self.symboles:
+                if row[sym] != "{ }":
+                    j = 0
+                    found = False
+                    for state in table:
+                        if not found and state["name"] != row[sym]:
+                            j += 1
+                        else:
+                            found = True
+                    newTransi.append(CTransition(newStates[i], newStates[j], sym))
+            i += 1
+
+        self.states = newStates.copy()
+        self.defaultStates = [self.states[0]]
+        self.table = newTransi.copy()
+                    
+        return self

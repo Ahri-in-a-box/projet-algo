@@ -47,5 +47,4 @@ if mode == 0:
 elif mode == 1:
     automaton.complete().minimise().save()
 elif mode == 2:
-    automaton.determine()
-    automaton.save()
+    automaton.determine().save()

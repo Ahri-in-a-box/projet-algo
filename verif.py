@@ -15,9 +15,9 @@ try:
     file2.close()
 
     if linesF1 == linesF2:
-        print(sys.argv[3] + " has been successfully minimised!")
+        print(sys.argv[3] + " has been successfully minimised/determinised!")
     else:
-        print(sys.argv[3] + " minimisation has failed!")
+        print(sys.argv[3] + " minimisation/determinisation has failed!")
         err = 0
         for i in range(0, len(linesF1)):
             if i >= len(linesF2):
