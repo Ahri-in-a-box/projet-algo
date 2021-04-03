@@ -11,6 +11,7 @@ class CState:
 
     def setName(self, name):
         self.name = name
+        return self
 
     def setFinal(self, isFinal):
         self.isFinal = isFinal

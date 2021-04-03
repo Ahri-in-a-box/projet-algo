@@ -25,20 +25,18 @@ else:
     aut = sys.argv[2]
     outp = sys.argv[3]
 
-path = None
-
 if aut[0] == '.':
     path = aut[:aut.rindex('/') + 1]
     aut = aut[aut.rindex('/') + 1:]
 else:
-    if mode == 1:
-        path = "./inputs(tests)/Minimisation/"
-    elif mode == 2:
-        path = "./inputs(tests)/Determinisation/"
+    path = None
     
 
 #creating automaton
-automaton = CAutomaton(aut, outp, path)
+if path:
+    automaton = CAutomaton(aut, outp, path)
+else:
+    automaton = CAutomaton(aut, outp)
 automaton.load()
 
 #Executing automaton

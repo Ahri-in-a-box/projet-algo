@@ -4,9 +4,6 @@ class CTransition:
         self.endState = state2
         self.condition = value
 
-    def print(self):
-        print(str(self.startState.getName()) + '-' + str(self.condition) + '->' + str(self.endState.getName()))
-
     def getStart(self):
         return self.startState
 

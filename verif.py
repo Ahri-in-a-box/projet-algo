@@ -4,22 +4,28 @@ import sys
 if len(sys.argv) <= 3:
     sys.exit("Not enough arguments to run the script")
 
+#Opening provided files
 try:
     file1 = open(sys.argv[1], "r")
     file2 = open(sys.argv[2], "r")
 except:
-    sys.exit("Could not openned one or both given files")
+    sys.exit("Could not openned one or both provided files")
 
+#Reading files
 linesF1 = file1.readlines()
 linesF2 = file2.readlines()
 
+#Closing files
 file1.close()
 file2.close()
 
+#Checking equivalence 
 if linesF1 == linesF2:
     print(sys.argv[3] + " has been successfully minimised/determinised!")
 else:
     print(sys.argv[3] + " minimisation/determinisation has failed!")
+
+    #Counting errors
     err = 0
     for i in range(0, len(linesF1)):
         if i >= len(linesF2):

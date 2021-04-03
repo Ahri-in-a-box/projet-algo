@@ -1,13 +1,11 @@
 from state import CState
 from transition import CTransition
+import sys
 
 class CAutomaton:
-    def __init__(self, name, output, path = None):
+    def __init__(self, name, output, path = "./"):
         self.name = name
-        if path is None:
-            self.path = "./inputs(tests)/" + name[:self.name.index('.')-1].upper() + "/"
-        else:
-            self.path = path
+        self.path = path
         self.symboles = []
         self.currentState = []
         self.defaultStates = []
@@ -54,6 +52,8 @@ class CAutomaton:
             
             self.table.append(CTransition(self.states[int(tmp[0])], self.states[int(tmp[1])], tmp[2]))
 
+        return self
+
     def save(self):
         #opening file
         try:
@@ -87,31 +87,15 @@ class CAutomaton:
         #closing file
         file.close()
 
+        return self
+
     def check(self, word):
         #reseting automaton
         self.currentState = self.defaultStates
 
         #running automaton
         for c in word:
-            #Checking all current states (for Non Deterministic Automatons)
-            nextStates = []
-            for cs in self.currentState:
-                #Checking available transitions for the corresponding event and current state
-                transi = []
-                for t in self.table:
-                    if t.isValid(cs, c):
-                        transi.append(t)
-
-                    #considering epsilon transition as # condition
-                    elif t.getCondition() == "#" and t.getStart() == cs: #Every epsilon transition leading to a state that isn't current is added to the current states list
-                        try:
-                            self.currentState.index(t.getEnd())
-                        except:
-                            self.currentState.append(t.getEnd())
-                
-                if len(transi) > 0:
-                    for t in transi:
-                        nextStates.append(t.take(cs, c))
+            nextStates = self.findNextStates(self.currentState, c)
 
             if len(nextStates) == 0:
                 return 0
@@ -142,6 +126,8 @@ class CAutomaton:
             file.write(str(self.check(word)) + '\n')
         file.close()
 
+        return self
+
     def checkFile(self, fileName):
         #Opening file
         try:
@@ -159,6 +145,7 @@ class CAutomaton:
                 lines[i] = lines[i][:-1]
 
         self.checkList(lines)
+        return self
 
     def minimise(self):
         #Moore algorithm
@@ -341,13 +328,16 @@ class CAutomaton:
 
     def findNextStates(self, states, symbole):
         nextStates = []
-
+        
+        #Checking all current states (for Non Deterministic Automatons)
         for cs in states:
+            #Checking available transitions for the corresponding event and current state
             transi = []
             for t in self.table:
                 if t.isValid(cs, symbole):
                     transi.append(t)
-                elif t.getCondition() == "#" and t.getStart() == cs: 
+                #considering epsilon transition as # condition
+                elif t.getCondition() == "#" and t.getStart() == cs: #Every epsilon transition leading to a state that isn't current is added to the current states list
                     try:
                         self.currentState.index(t.getEnd())
                     except:
